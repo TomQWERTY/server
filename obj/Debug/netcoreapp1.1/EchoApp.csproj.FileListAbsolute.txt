@@ -1,0 +1,14 @@
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp1.1/EchoApp.csprojAssemblyReference.cache
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp1.1/EchoApp.AssemblyInfoInputs.cache
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp1.1/EchoApp.AssemblyInfo.cs
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp1.1/EchoApp.csproj.CoreCompileInputs.cache
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp1.1/appsettings.Development.json
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp1.1/appsettings.json
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp1.1/EchoApp.deps.json
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp1.1/EchoApp.runtimeconfig.json
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp1.1/EchoApp.runtimeconfig.dev.json
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp1.1/EchoApp.dll
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp1.1/EchoApp.pdb
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp1.1/EchoApp.dll
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp1.1/EchoApp.pdb
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp1.1/EchoApp.genruntimeconfig.cache

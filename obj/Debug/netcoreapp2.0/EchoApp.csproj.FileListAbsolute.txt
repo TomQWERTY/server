@@ -1,0 +1,14 @@
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp2.0/appsettings.Development.json
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp2.0/appsettings.json
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp2.0/EchoApp.deps.json
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp2.0/EchoApp.runtimeconfig.json
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp2.0/EchoApp.runtimeconfig.dev.json
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp2.0/EchoApp.dll
+/home/intern/Projects/EchoApp/bin/Debug/netcoreapp2.0/EchoApp.pdb
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp2.0/EchoApp.csprojAssemblyReference.cache
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp2.0/EchoApp.AssemblyInfoInputs.cache
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp2.0/EchoApp.AssemblyInfo.cs
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp2.0/EchoApp.csproj.CoreCompileInputs.cache
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp2.0/EchoApp.dll
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp2.0/EchoApp.pdb
+/home/intern/Projects/EchoApp/obj/Debug/netcoreapp2.0/EchoApp.genruntimeconfig.cache
