@@ -22,89 +22,165 @@ namespace EchoApp
         public int x {get; set;}
         public int y {get; set;}
 
-        /*public Point(int x_, int y_)
+        public Point(int x_, int y_)
         {
             x = x_;
             y = y_;
-        }*/
+        }
+
+        public Point(Hex h)
+        {
+            x = h.x + (h.y + 1) / 2;
+            y = h.y;
+        }
+
+        public Point() {}        
+
+        public bool InField => y >= 0 && y < 11 && x >= 0 && x < 15;
     }
 
-    public class Connector
+    public class Hex
     {
-        public Objects obj {get; set;}
-        public int x {get; set;}
-        public int y {get; set;}
-        public int turn {get; set;}
-        public Connector(Objects obj_, int x_, int y_, int z_, int turn_)
-        {
-            obj = obj_;
-            y = x_;
-            x = y - y_;
-            turn = turn_;
-        }
+        public int x;
+        public int y;
+        public int z;
 
-        public Connector(Objects obj_, int x_, int y_, int turn_)
+        public Hex(int x_, int y_, int z_)
         {
-            obj = obj_;
             x = x_;
             y = y_;
-            turn = turn_;
+            z = z_;
         }
+
+        public Hex(int x_, int y_)
+        {
+            x = x_ - (y_ + 1) / 2;
+            y = y_;
+            z = -(x + y);
+        }
+
+        public Hex(Point p)
+        {
+            x = p.x - (p.y + 1) / 2;
+            y = p.y;
+            z = -(x + y);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            Hex hex = (Hex)obj;
+            return (hex.x == this.x && hex.y == this.y && hex.z == this.z);
+        }
+
+        public bool InField => y >= 0 && y < 11 && x + (y + 1) / 2 >= 0 && x + (y + 1) / 2 < 15;
     }
-    
+
     public class Objects
     {
-        public int speed {get; set;}
-        public string img {get; set;}
-        public bool doubleCell {get; set;}
-        public List<Point> canMove {get; set;}
+        public string imageLink;
+        public int speed;
+        public bool doubled;
+        public bool flying;
+        public List<Hex> canMove = new List<Hex>();
 
-        public Objects(int speed_, string img_, bool doubleCell_)
+        public Objects(string imageLink_, int speed_, bool doubled_, bool flying_)
         {
+            imageLink = imageLink_;
             speed = speed_;
-            img = img_;
-            doubleCell = doubleCell_;
-            canMove = new List<Point>();
+            doubled = doubled_;
+            flying = flying_;
         }
     }
 
-    public class HexArray
+    public class Field
     {
-        public Objects[][][] array {get; set;}
-
-        public HexArray()
-        {
-            array = new Objects[30][][];
-            for (int i = 0; i < array.Length; i++)
-            {
-                array[i] = new Objects[30][];  
-                for (int j = 0; j < array[i].Length; j++)
-                {
-                    array[i][j] = new Objects[30];
-                }
-            }
-        }
+        Objects[,] Base = new Objects[15, 11];
 
         public Objects this[int x, int y, int z]
         {
-            get => array[x + 14][y + 14][z + 14];
-            set => array[x + 14][y + 14][z + 14] = value; 
+            get => Base[x + (y + 1) / 2, y];
+            set => Base[x + (y + 1) / 2, y] = value;
+        }
+
+        public Objects this[Hex h]
+        {
+            get => this[h.x, h.y, h.z];
+            set => this[h.x, h.y, h.z] = value;
         }
 
         public Objects this[int x, int y]
         {
-            get => this[y, x - y, -(x + y)];
-            //set => array[y][x - y][-(x + y)] = value;
-            set
+            get => Base[x, y];
+            set => Base[x, y] = value;
+        }
+
+        public Objects this[Point p]
+        {
+            get => this[p.x, p.y];
+            set => this[p.x, p.y] = value;
+        }
+
+        public void CanMove()
+        {
+            for (int i = 0; i < 11; i++)
+                for (int j = 0; j < 15; j++)
+                    if (this[j, i] != null)
+                    {
+                        this[j, i].canMove.Clear();
+                        List<Hex> hexes = new List<Hex>() { new Hex(j, i) };
+                        if (this[j, i].doubled)
+                            hexes.Add(new Hex(j - 1, i));
+                        Search(this[j, i], hexes, this[j, i].speed);
+                        if (this[j, i].doubled)
+                            Check(this[j, i]);
+                    }
+        }
+
+        public void Check(Objects obj)
+        {
+            for (int i = 0; i < obj.canMove.Count;)
+                if (!obj.canMove.Contains(new Hex(new Point(obj.canMove[i]).x + 1, new Point(obj.canMove[i]).y)) && !obj.canMove.Contains(new Hex(new Point(obj.canMove[i]).x - 1, new Point(obj.canMove[i]).y)))
+                    obj.canMove.Remove(obj.canMove[i]);
+                else
+                    i++;
+        }
+
+        public void Search(Objects obj, List<Hex> Hexes, int speed)
+        {
+            List<Hex> newHexes = new List<Hex>();
+            foreach (Hex h in Hexes)
             {
-                this[y, x - y, -(x + y)] = value;
-                Console.WriteLine((y) + "; " + (x - y) + "; " + (-(x + y)));
+                if (this[h] == null)
+                    obj.canMove.Add(h);
+                if (speed > 0)
+                {
+                    Hex[] hexes = new Hex[]
+                    {
+                        new Hex(h.x + 1, h.y - 1, h.z),
+                        new Hex(h.x + 1, h.y, h.z - 1),
+                        new Hex(h.x - 1, h.y + 1, h.z),
+                        new Hex(h.x, h.y + 1, h.z - 1),
+                        new Hex(h.x - 1, h.y, h.z + 1),
+                        new Hex(h.x, h.y - 1, h.z + 1)
+                    };
+
+                    foreach (Hex h2 in hexes)
+                        if (h2.InField && (this[h2] == null || obj.flying) && !Hexes.Contains(h2) && !newHexes.Contains(h2))
+                            newHexes.Add(h2);
+                }
             }
+            if (newHexes.Count > 0)
+                Search(obj, newHexes, speed - 1);
         }
     }
 
     public class Startup
     {
+        List<WebSocket> players = new List<WebSocket>();
+        int turn = 0;
+        bool kostil = true;
+        bool free = true;
+        int cn = 0;
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -116,7 +192,6 @@ namespace EchoApp
         {
             //loggerFactory.AddConsole(LogLevel.Debug);
             //loggerFactory.AddDebug(LogLevel.Debug);
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -132,7 +207,7 @@ namespace EchoApp
             var webSocketOptions = new WebSocketOptions()
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
-                ReceiveBufferSize = 4 * 1024
+                //ReceiveBufferSize = 4 * 1024
             };
             app.UseWebSockets(webSocketOptions);
             #endregion
@@ -140,12 +215,19 @@ namespace EchoApp
             #region AcceptWebSocket
             app.Use(async (context, next) =>
             {
+                // /game/2930nfin89fmdskf340fmsmkdbgn934fdmkf/socket
+                // 2930nfin89fmdskf340fmsmkdbgn934fdmkf => [s1, s2, s3]
+                // ,dsmfkdsnfkjbdsfdsklf => [s4, s5, s6]
                 if (context.Request.Path == "/ws")
                 {
-                    if (context.WebSockets.IsWebSocketRequest)
+                    if (context.WebSockets.IsWebSocketRequest && players.Count < 2)
                     {
-                        WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                        await Echo(context, webSocket);
+                        kostil = !kostil;
+                        if (kostil)
+                        {
+                            players.Add(await context.WebSockets.AcceptWebSocketAsync());
+                            await Game(context, players.Last(), players.Count - 1);
+                        }
                     }
                     else
                     {
@@ -162,13 +244,12 @@ namespace EchoApp
             app.UseFileServer();
         }
 
-#region Echo
-        private async Task Echo(HttpContext context, WebSocket webSocket)
+#region Main
+        private async Task Game(HttpContext context, WebSocket webSocket, int n)
         {
             Point p;
-            
-            HexArray hexArray = new HexArray();
-            hexArray[0, 0, 0] = new Objects(3, "https://i.ibb.co/rGJc40v/Zealot.png", false);
+            //HexArray hexArray = new HexArray();
+            //hexArray[0, 0, 0] = new Objects(3, "https://i.ibb.co/rGJc40v/Zealot.png", false);
             
             /*hexArray[0, 0, 0].speed = 3;
             hexArray[0, 0, 0].img = "https://i.ibb.co/rGJc40v/Zealot.png";
@@ -183,37 +264,54 @@ namespace EchoApp
             /*objects[4, 9] = new Objects(4, 9, 5, "https://i.ibb.co/263MvmM/Angel.png", false);
             objects[11, 7] = new Objects(11, 7, 3, "https://i.ibb.co/s5CCHZj/Royal-Griffin.png", true);*/
             var buffer = new byte[1024 * 4];
-            WebSocketReceiveResult result;
-
-            int turn = 0;
+            WebSocketReceiveResult result = new WebSocketReceiveResult(1024 * 4, WebSocketMessageType.Text, true);
+            await players[n].SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
+                        n, typeof(int))),
+                        result.MessageType, result.EndOfMessage, CancellationToken.None);         
             
             while (true)
             {
-                result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                Console.WriteLine("got");
-                if (result.CloseStatus.HasValue) 
+                if (turn == n && free)
                 {
-                    Console.WriteLine("break");
-                    break;
-                }
-                /*for (int i = 0; i < result.Count; i++)
-                {
-                    Console.Write(Convert.ToChar(buffer[i]));
-                }*/
-                p = (Point)JsonSerializer.Deserialize(new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Point));
-                //p.x++;
-                
-                hexArray[p.x, p.y] = new Objects(2, "https://i.ibb.co/j8qr53X/pess.png", false);
-                Console.WriteLine("fdghajuibdgfeabgidbasgdsbtgrou");
-                /*await webSocket.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
-                    new Connector[1]{new Connector(hexArray[0, 0, 0], 0, 0, 0)}, typeof(Connector[]))),
-                    result.MessageType, result.EndOfMessage, CancellationToken.None);
-                    Console.WriteLine("sent");*/
-                    await webSocket.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
-                    new Connector(hexArray[p.x, p.y], p.x, p.y, turn), typeof(Connector))),
-                    result.MessageType, result.EndOfMessage, CancellationToken.None);
+                    free = false;
+                    cn++;
+
+                    Console.WriteLine("cn " + cn);
+                    
+                    Console.WriteLine("turn was " + turn);
                     turn = turn == 0 ? 1 : 0;
+                    Console.WriteLine("turn now " + turn);
+                    Console.WriteLine("game " + n);
+                    
+                    result = await players[n].ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    Console.WriteLine(result.MessageType);
+                    //Console.WriteLine("endpoint = " + context.WebSockets.);
+                    
+                    //result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    
+                    Console.WriteLine("got " + n);
+                    if (result.CloseStatus.HasValue) 
+                    {
+                        Console.WriteLine("break");
+                        break;
+                    }
+                    p = (Point)JsonSerializer.Deserialize(new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Point));
+                    //p.x++;
+                    Console.WriteLine(p.x + "; " + p.y);
+                    //hexArray[p.x, p.y] = new Objects(2, "https://i.ibb.co/j8qr53X/pess.png", true);
+                    /*await webSocket.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
+                        new Connector[1]{new Connector(hexArray[0, 0, 0], 0, 0, 0)}, typeof(Connector[]))),
+                        result.MessageType, result.EndOfMessage, CancellationToken.None);
+                        Console.WriteLine("sent");*/
+                    foreach (WebSocket player in players)
+                    {
+                        await player.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
+                                                p, typeof(Point))),
+                                                result.MessageType, result.EndOfMessage, CancellationToken.None);
+                    }
                     Console.WriteLine("sent");
+                    free = true;
+                }
             }
             Console.WriteLine("closed");
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
