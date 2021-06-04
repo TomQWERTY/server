@@ -36,6 +36,12 @@ namespace EchoApp
 
         public Point() { }
 
+        public override bool Equals(Object obj)
+        {
+            Point point = (Point)obj;
+            return (point.x == this.x && point.y == this.y);
+        }
+
         public bool InField => y >= 0 && y < 11 && x >= 0 && x < 15;
     }
 
@@ -146,21 +152,19 @@ namespace EchoApp
                     if (this[j, i] != null)
                     {
                         this[j, i].canMove.Clear();
-                        Search(this[j, i], new List<Point>() { new Point(j, i) }, this[j, i].speed);
+                        Search(this[j, i], new List<Hex>() { new Hex(j, i) }, this[j, i].speed);
                     }
         }
 
-        public void Search(Objects obj, List<Point> Hexes, int speed)
+        public void Search(Objects obj, List<Hex> Hexes, int speed)
         {
-            Console.WriteLine($"speed {speed}");
-            List<Point> newHexes = new List<Point>();
-            foreach (Point p in Hexes)
+            List<Hex> newHexes = new List<Hex>();
+            foreach (Hex h in Hexes)
             {
-                if (this[p] == null)
-                    obj.canMove.Add(p);
+                if (this[h] == null && !obj.canMove.Contains(new Point(h)))
+                    obj.canMove.Add(new Point(h));
                 if (speed > 0)
                 {
-                    Hex h = new Hex(p);
                     Hex[] hexes = new Hex[]
                     {
                         new Hex(h.x + 1, h.y - 1, h.z),
@@ -172,11 +176,11 @@ namespace EchoApp
                     };
 
                     foreach (Hex h2 in hexes)
-                        if (h2.InField && this[h2] == null && !Hexes.Contains(new Point(h2)) && !newHexes.Contains(new Point(h2)))
-                            newHexes.Add(new Point(h2));
+                        if (h2.InField && (this[h2] == null || obj.flying) && !Hexes.Contains(h2) && !newHexes.Contains(h2))
+                            newHexes.Add(h2);
                 }
             }
-            if (newHexes.Count > 0 && speed > 0)
+            if (newHexes.Count > 0)
                 Search(obj, newHexes, speed - 1);
         }
     }
@@ -357,12 +361,12 @@ namespace EchoApp
                                 players.Add(new Player(await context.WebSockets.AcceptWebSocketAsync(),
                                 new List<Objects>()
                                 {
-                                    new Objects("https://i.ibb.co/j8qr53X/pess.png", 3, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/smx7dvv/Archer.png", 4, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/zV0VBTQ/Champion.png", 11, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/4ZJBdXN/Halberdier.png", 5, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/263MvmM/Angel.png", 15, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/s5CCHZj/Royal-Griffin.png", 11, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/j8qr53X/pess.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/smx7dvv/Archer.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/zV0VBTQ/Champion.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/4ZJBdXN/Halberdier.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/263MvmM/Angel.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/s5CCHZj/Royal-Griffin.png", 1, false, false, players.Count, false),
                                 }));
                             }
                             else if (players.Count == 1)
@@ -371,12 +375,12 @@ namespace EchoApp
                                 players.Add(new Player(await context.WebSockets.AcceptWebSocketAsync(),
                                 new List<Objects>()
                                 {
-                                    new Objects("https://i.ibb.co/sQFZ3PV/Royal-Griffin-Left.png", 11, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/kG9r7vm/Angel-Left.png", 15, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/SsL9fLx/Champion-Left.png", 11, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/n714GqW/pessLeft.png", 3, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/5cHr7yp/Halberdier-Left.png", 5, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/FKRm0Qb/Archer-Left.png", 4, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/sQFZ3PV/Royal-Griffin-Left.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/kG9r7vm/Angel-Left.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/SsL9fLx/Champion-Left.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/n714GqW/pessLeft.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/5cHr7yp/Halberdier-Left.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/FKRm0Qb/Archer-Left.png", 1, false, false, players.Count, false),
                                 }));
                             }
                             if (players.Count == 2)
@@ -506,8 +510,10 @@ namespace EchoApp
                         Console.WriteLine("break");
                         break;
                     }
+                    
                     p = (Point)JsonSerializer.Deserialize(
                         new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Point));
+                        Console.WriteLine("deserizl");
                     //List<Connector> conns = new List<Connector>();
                     /*switch (((Connector)JsonSerializer.Deserialize(
                         new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Connector))).conType)

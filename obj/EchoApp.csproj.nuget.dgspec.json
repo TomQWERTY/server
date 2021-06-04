@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/intern/Projects/EchoApp/EchoApp.csproj": {}
+    "/home/intern/Projects/server/EchoApp.csproj": {}
   },
   "projects": {
-    "/home/intern/Projects/EchoApp/EchoApp.csproj": {
+    "/home/intern/Projects/server/EchoApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/intern/Projects/EchoApp/EchoApp.csproj",
+        "projectUniqueName": "/home/intern/Projects/server/EchoApp.csproj",
         "projectName": "EchoApp",
-        "projectPath": "/home/intern/Projects/EchoApp/EchoApp.csproj",
+        "projectPath": "/home/intern/Projects/server/EchoApp.csproj",
         "packagesPath": "/home/intern/.nuget/packages/",
-        "outputPath": "/home/intern/Projects/EchoApp/obj/",
+        "outputPath": "/home/intern/Projects/server/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/intern/.nuget/NuGet/NuGet.Config"
@@ -89,7 +89,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/5.0.203/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/snap/dotnet-sdk/128/sdk/5.0.300/RuntimeIdentifierGraph.json"
         }
       }
     }
