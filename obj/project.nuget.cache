@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "58zU4vad2IN6WMRoba6SNycizli7jpFHSaO8wEeA+UCNuqicqQ5UluXXnuwKGMY8T6oiK+jcfBvgKf0HITCejw==",
+  "dgSpecHash": "W3pjxDEpBQIrgMaC52vgI2psjQquQ9+VBu6aH5AKsR+goZlztn8P+ozxldQHpyGefKaR67AANZzdSP9vysgHYg==",
   "success": true,
-  "projectFilePath": "/home/intern/Projects/server/EchoApp.csproj",
+  "projectFilePath": "/home/intern/Projects/EchoApp/EchoApp.csproj",
   "expectedPackageFiles": [
     "/home/intern/.nuget/packages/microsoft.aspnetcore.authentication.abstractions/2.2.0/microsoft.aspnetcore.authentication.abstractions.2.2.0.nupkg.sha512",
     "/home/intern/.nuget/packages/microsoft.aspnetcore.authentication.core/2.2.0/microsoft.aspnetcore.authentication.core.2.2.0.nupkg.sha512",

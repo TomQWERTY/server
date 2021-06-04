@@ -42,7 +42,12 @@ namespace EchoApp
             return (point.x == this.x && point.y == this.y);
         }
 
-        public bool InField => y >= 0 && y < 11 && x >= 0 && x < 15;
+        public override int GetHashCode()
+        {
+            return x ^ y;
+        }
+
+        //public bool InField => y >= 0 && y < 11 && x >= 0 && x < 15;
     }
 
     public class Hex
@@ -361,12 +366,12 @@ namespace EchoApp
                                 players.Add(new Player(await context.WebSockets.AcceptWebSocketAsync(),
                                 new List<Objects>()
                                 {
-                                    new Objects("https://i.ibb.co/j8qr53X/pess.png", 1, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/smx7dvv/Archer.png", 1, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/zV0VBTQ/Champion.png", 1, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/4ZJBdXN/Halberdier.png", 1, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/263MvmM/Angel.png", 1, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/s5CCHZj/Royal-Griffin.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/j8qr53X/pess.png", 3, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/smx7dvv/Archer.png", 5, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/zV0VBTQ/Champion.png", 11, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/4ZJBdXN/Halberdier.png", 4, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/263MvmM/Angel.png", 15, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/s5CCHZj/Royal-Griffin.png", 12, false, false, players.Count, false),
                                 }));
                             }
                             else if (players.Count == 1)
@@ -375,12 +380,12 @@ namespace EchoApp
                                 players.Add(new Player(await context.WebSockets.AcceptWebSocketAsync(),
                                 new List<Objects>()
                                 {
-                                    new Objects("https://i.ibb.co/sQFZ3PV/Royal-Griffin-Left.png", 1, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/kG9r7vm/Angel-Left.png", 1, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/SsL9fLx/Champion-Left.png", 1, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/n714GqW/pessLeft.png", 1, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/5cHr7yp/Halberdier-Left.png", 1, false, false, players.Count, false),
-                                    new Objects("https://i.ibb.co/FKRm0Qb/Archer-Left.png", 1, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/sQFZ3PV/Royal-Griffin-Left.png", 12, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/kG9r7vm/Angel-Left.png", 15, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/SsL9fLx/Champion-Left.png", 11, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/n714GqW/pessLeft.png", 3, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/5cHr7yp/Halberdier-Left.png", 4, false, false, players.Count, false),
+                                    new Objects("https://i.ibb.co/FKRm0Qb/Archer-Left.png", 5, false, false, players.Count, false),
                                 }));
                             }
                             if (players.Count == 2)
@@ -389,36 +394,36 @@ namespace EchoApp
                                 int y = 0;
                                 foreach (Objects obj in players[0].squad)
                                 {
-                                    Console.WriteLine("loh in cycle 1");
                                     field[0, y] = obj;
                                     y += 2;
                                 }
                                 y = 0;
                                 foreach (Objects obj in players[1].squad)
                                 {
-                                    Console.WriteLine("loh in cycle 2");
                                     field[14, y] = obj;
                                     y += 2;
                                 }
                                 Console.WriteLine("loh after cycle");
-
+                                StartRound();
+                                SortHoding();
+                                TestSort();
+                                turn = field[hoding[0]].playerId;
                                 field.CanMove();
                                 for (int i = 0; i < players.Count; i++)
                                 {
                                     await players[i].connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
-                                                        new ConnectorInitialState(field.Base, i), typeof(ConnectorInitialState))),
-                                                        result.MessageType, result.EndOfMessage, CancellationToken.None);
+                                        new ConnectorInitialState(field.Base, i), typeof(ConnectorInitialState))),
+                                        result.MessageType, result.EndOfMessage, CancellationToken.None);
+                                    await players[i].connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
+                                        new ConnectorTurn(hoding[0], i == turn), typeof(ConnectorTurn))),
+                                        result.MessageType, result.EndOfMessage, CancellationToken.None);
                                     Console.WriteLine("sent initial " + i);
                                 }
-                                StartRound();
-                                SortHoding();
+                                
                                 foreach (Point p in field[hoding[0]].canMove)
                                 {
                                     Console.WriteLine(p.x + "\t" + p.y);
                                 }
-
-                                TestSort();
-                                turn = field[hoding[0]].playerId;
                             }
                             await Game(players.Last(), players.Count - 1);//strashno
                         }
@@ -487,13 +492,18 @@ namespace EchoApp
                     for (int i = 0; i < players.Count; i++)
                     {
                         await players[i].connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
-                                                new ConnectorTurn(hoding[0], i == turn), typeof(ConnectorTurn))),
-                                                result.MessageType, result.EndOfMessage, CancellationToken.None);
+                            new ConnectorTurn(hoding[0], i == turn), typeof(ConnectorTurn))),
+                            result.MessageType, result.EndOfMessage, CancellationToken.None);
+                        await players[i].connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
+                            new ConnectorInitialState(field.Base, i), typeof(ConnectorInitialState))),
+                            result.MessageType, result.EndOfMessage, CancellationToken.None);
                     }
 
                     result = await player.connection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    //field[p.x, p.y] = field[hoding[0].x, hoding[0].y];
-                    //field[hoding[0].x, hoding[0].y] = null;
+                    p = (Point)JsonSerializer.Deserialize(
+                        new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Point));
+                    field[p.x, p.y] = field[hoding[0].x, hoding[0].y];
+                    field[hoding[0].x, hoding[0].y] = null;
                     hoding.RemoveAt(0);
                     SortHoding();
                     field.CanMove();
@@ -510,10 +520,9 @@ namespace EchoApp
                         Console.WriteLine("break");
                         break;
                     }
+
                     
-                    p = (Point)JsonSerializer.Deserialize(
-                        new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Point));
-                        Console.WriteLine("deserizl");
+                    Console.WriteLine("deserizl");
                     //List<Connector> conns = new List<Connector>();
                     /*switch (((Connector)JsonSerializer.Deserialize(
                         new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Connector))).conType)
