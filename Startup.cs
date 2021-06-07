@@ -604,7 +604,12 @@ namespace EchoApp
                     }
                     if (hoding.Count > 0) turn = field[hoding[0]].playerId;
                     else if (waiting.Count > 0) turn = field[waiting[0]].playerId;
-                    else StartRound();
+                    else
+                    {
+                        StartRound();
+                        SortHoding();
+                        turn = field[hoding[0]].playerId;
+                    }
 
                     //Console.WriteLine(p.x + "; " + p.y);
                     //hexArray[p.x, p.y] = new Objects(2, "https://i.ibb.co/j8qr53X/pess.png", true);
