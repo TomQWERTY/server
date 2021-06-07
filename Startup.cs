@@ -202,9 +202,11 @@ namespace EchoApp
         }
     }
 
-    public abstract class Connector
+    public class Connector
     {
         public string conType { get; set; }
+
+        public Connector() { }
     }
 
     public class ConnectorMove : Connector
@@ -216,6 +218,8 @@ namespace EchoApp
             conType = "Move";
             point = p;
         }
+
+        public ConnectorMove() { }
     }
 
     public class ConnectorInitialState : Connector
@@ -249,6 +253,14 @@ namespace EchoApp
         public ConnectorWait()
         {
             conType = "Wait";
+        }
+    }
+
+    public class ConnectorHold : Connector
+    {
+        public ConnectorHold()
+        {
+            conType = "Hold";
         }
     }
 
@@ -419,11 +431,6 @@ namespace EchoApp
                                         result.MessageType, result.EndOfMessage, CancellationToken.None);
                                     Console.WriteLine("sent initial " + i);
                                 }
-                                
-                                foreach (Point p in field[hoding[0]].canMove)
-                                {
-                                    Console.WriteLine(p.x + "\t" + p.y);
-                                }
                             }
                             await Game(players.Last(), players.Count - 1);//strashno
                         }
@@ -498,22 +505,8 @@ namespace EchoApp
                             new ConnectorInitialState(field.Base, i), typeof(ConnectorInitialState))),
                             result.MessageType, result.EndOfMessage, CancellationToken.None);
                     }
-
+                    Console.WriteLine("ready to get");
                     result = await player.connection.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    p = (Point)JsonSerializer.Deserialize(
-                        new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Point));
-                    field[p.x, p.y] = field[hoding[0].x, hoding[0].y];
-                    field[hoding[0].x, hoding[0].y] = null;
-                    hoding.RemoveAt(0);
-                    SortHoding();
-                    field.CanMove();
-                    TestSort();
-                    Console.WriteLine(hoding.Count);
-                    if (hoding.Count > 0) turn = field[hoding[0]].playerId;
-                    //Console.WriteLine("endpoint = " + context.WebSockets.);
-
-                    //result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
                     Console.WriteLine("got " + n);
                     if (result.CloseStatus.HasValue)
                     {
@@ -521,20 +514,62 @@ namespace EchoApp
                         break;
                     }
 
-                    
+                    //Console.WriteLine("endpoint = " + context.WebSockets.);
+
+                    //result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+
+
+
                     Console.WriteLine("deserizl");
                     //List<Connector> conns = new List<Connector>();
-                    /*switch (((Connector)JsonSerializer.Deserialize(
+                    Console.WriteLine(((Connector)JsonSerializer.Deserialize(
+                        new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Connector))).conType);
+                    switch (((Connector)JsonSerializer.Deserialize(
                         new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Connector))).conType)
                     {
                         case "Move":
-                            conns.Add(new ConnectorMove((Point)JsonSerializer.Deserialize(
-                            new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Point))));
+                            /*conns.Add(new ConnectorMove((Point)JsonSerializer.Deserialize(
+                            new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Point))));*/
+                            p = ((ConnectorMove)JsonSerializer.Deserialize(
+                                new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(ConnectorMove))).point;
+                            field[p.x, p.y] = field[hoding[0].x, hoding[0].y];
+                            field[hoding[0].x, hoding[0].y] = null;
+                            hoding.RemoveAt(0);
+                            SortHoding();
+                            field.CanMove();
+                            TestSort();
+                            Console.WriteLine("in move");
+                            
+                            for (int i = 0; i < players.Count; i++)
+                            {
+                                /*foreach (Connector conn in conns)
+                                {
+                                    await players[i].connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
+                                                        conn, conn.GetType())),
+                                                        result.MessageType, result.EndOfMessage, CancellationToken.None);
+                                }*/
+                                await players[i].connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
+                                 new ConnectorMove(p), typeof(ConnectorMove))),
+                                 result.MessageType, result.EndOfMessage, CancellationToken.None);
+                            }
                             break;
                         case "Wait":
 
                             break;
-                    }*/
+                        case "Hold":
+                                Console.WriteLine("in hold");
+                            if (hoding.Count > 0)
+                            {
+                                hoding.RemoveAt(0);
+                            }
+                            else
+                            {
+                                waiting.RemoveAt(0);
+                            }
+                            break;
+                    }
+                    if (hoding.Count > 0) turn = field[hoding[0]].playerId;
 
                     //Console.WriteLine(p.x + "; " + p.y);
                     //hexArray[p.x, p.y] = new Objects(2, "https://i.ibb.co/j8qr53X/pess.png", true);
@@ -542,18 +577,7 @@ namespace EchoApp
                         new Connector[1]{new Connector(hexArray[0, 0, 0], 0, 0, 0)}, typeof(Connector[]))),
                         result.MessageType, result.EndOfMessage, CancellationToken.None);
                         Console.WriteLine("sent");*/
-                    for (int i = 0; i < players.Count; i++)
-                    {
-                        /*foreach (Connector conn in conns)
-                        {
-                            await players[i].connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
-                                                conn, conn.GetType())),
-                                                result.MessageType, result.EndOfMessage, CancellationToken.None);
-                        }*/
-                        await players[i].connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
-                         new ConnectorMove(p), typeof(ConnectorMove))),
-                         result.MessageType, result.EndOfMessage, CancellationToken.None);
-                    }
+
 
                     Console.WriteLine("sent");
                     free = true;
