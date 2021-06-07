@@ -264,8 +264,6 @@ namespace EchoApp
         }
     }
 
-
-
     public class Startup
     {
         WebSocketReceiveResult result = new WebSocketReceiveResult(1024 * 4, WebSocketMessageType.Text, true);
@@ -313,6 +311,25 @@ namespace EchoApp
             Console.WriteLine("sorting loh");
         }
 
+        public void SortWaiting()
+        {
+            for (int i = 0; i < waiting.Count - 1;)
+            {
+                int minSpeed = field[waiting[0].x, waiting[0].y].speed;
+                for (int j = i; j < waiting.Count; j++)
+                    if (field[waiting[j].x, waiting[j].y].speed < minSpeed)
+                        minSpeed = field[waiting[j].x, waiting[j].y].speed;
+                for (int j = i; j < waiting.Count; j++)
+                    if (field[waiting[j].x, waiting[j].y].speed == minSpeed)
+                    {
+                        Point swap = waiting[i];
+                        waiting[i] = waiting[j];
+                        waiting[j] = swap;
+                        i++;
+                    }
+            }
+        }
+
         public void TestSort()
         {
             Console.WriteLine("-=LOHHHH=-");
@@ -320,12 +337,6 @@ namespace EchoApp
             {
                 Console.WriteLine(p.x + ";\t" + p.y + "\t" + field[p.x, p.y].speed);
             }
-        }
-
-        public void SortWaiting()
-        {
-
-            waiting.Sort();
         }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
@@ -498,8 +509,14 @@ namespace EchoApp
                     Console.WriteLine("game " + n);*/
                     for (int i = 0; i < players.Count; i++)
                     {
+                        Point hod;
+                        if (hoding.Count > 0)
+                            hod = hoding[0];
+                        else
+                            hod = waiting[0];
+
                         await players[i].connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
-                            new ConnectorTurn(hoding[0], i == turn), typeof(ConnectorTurn))),
+                            new ConnectorTurn(hod, i == turn), typeof(ConnectorTurn))),
                             result.MessageType, result.EndOfMessage, CancellationToken.None);
                         await players[i].connection.SendAsync(new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(
                             new ConnectorInitialState(field.Base, i), typeof(ConnectorInitialState))),
@@ -531,16 +548,26 @@ namespace EchoApp
                         case "Move":
                             /*conns.Add(new ConnectorMove((Point)JsonSerializer.Deserialize(
                             new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(Point))));*/
+                            Point hod;
+                            if (hoding.Count > 0)
+                                hod = hoding[0];
+                            else
+                                hod = waiting[0];
+
                             p = ((ConnectorMove)JsonSerializer.Deserialize(
                                 new ReadOnlySpan<byte>(buffer, 0, result.Count), typeof(ConnectorMove))).point;
-                            field[p.x, p.y] = field[hoding[0].x, hoding[0].y];
-                            field[hoding[0].x, hoding[0].y] = null;
-                            hoding.RemoveAt(0);
+                            field[p.x, p.y] = field[hod.x, hod.y];
+                            field[hod.x, hod.y] = null;
+
+                            if (hoding.Count > 0)
+                                hoding.RemoveAt(0);
+                            else
+                                waiting.RemoveAt(0);
                             SortHoding();
                             field.CanMove();
                             TestSort();
                             Console.WriteLine("in move");
-                            
+
                             for (int i = 0; i < players.Count; i++)
                             {
                                 /*foreach (Connector conn in conns)
@@ -555,10 +582,16 @@ namespace EchoApp
                             }
                             break;
                         case "Wait":
-
+                            Console.WriteLine("in wait");
+                            if (hoding.Count > 0)
+                            {
+                                waiting.Add(hoding[0]);
+                                hoding.RemoveAt(0);
+                                //SortWaiting();
+                            }
                             break;
                         case "Hold":
-                                Console.WriteLine("in hold");
+                            Console.WriteLine("in hold");
                             if (hoding.Count > 0)
                             {
                                 hoding.RemoveAt(0);
@@ -570,6 +603,8 @@ namespace EchoApp
                             break;
                     }
                     if (hoding.Count > 0) turn = field[hoding[0]].playerId;
+                    else if (waiting.Count > 0) turn = field[waiting[0]].playerId;
+                    else StartRound();
 
                     //Console.WriteLine(p.x + "; " + p.y);
                     //hexArray[p.x, p.y] = new Objects(2, "https://i.ibb.co/j8qr53X/pess.png", true);
