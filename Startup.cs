@@ -591,7 +591,7 @@ namespace EchoApp
                             {
                                 waiting.Add(hoding[0]);
                                 hoding.RemoveAt(0);
-                                //SortWaiting();
+                                SortWaiting();
                             }
                             break;
                         case "Hold":

@@ -6198,11 +6198,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/intern/Projects/EchoApp/EchoApp.csproj",
+      "projectUniqueName": "/home/intern/Projects/server/EchoApp.csproj",
       "projectName": "EchoApp",
-      "projectPath": "/home/intern/Projects/EchoApp/EchoApp.csproj",
+      "projectPath": "/home/intern/Projects/server/EchoApp.csproj",
       "packagesPath": "/home/intern/.nuget/packages/",
-      "outputPath": "/home/intern/Projects/EchoApp/obj/",
+      "outputPath": "/home/intern/Projects/server/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/home/intern/.nuget/NuGet/NuGet.Config"

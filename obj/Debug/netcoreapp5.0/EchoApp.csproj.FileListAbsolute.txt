@@ -39,7 +39,6 @@
 /home/intern/Projects/server/bin/Debug/netcoreapp5.0/Microsoft.AspNetCore.Server.Kestrel.Https.dll
 /home/intern/Projects/server/bin/Debug/netcoreapp5.0/Microsoft.AspNetCore.Server.Kestrel.Transport.Abstractions.dll
 /home/intern/Projects/server/bin/Debug/netcoreapp5.0/Newtonsoft.Json.dll
-/home/intern/Projects/server/obj/Debug/netcoreapp5.0/EchoApp.csproj.AssemblyReference.cache
 /home/intern/Projects/server/obj/Debug/netcoreapp5.0/EchoApp.GeneratedMSBuildEditorConfig.editorconfig
 /home/intern/Projects/server/obj/Debug/netcoreapp5.0/EchoApp.AssemblyInfoInputs.cache
 /home/intern/Projects/server/obj/Debug/netcoreapp5.0/EchoApp.AssemblyInfo.cs
@@ -82,3 +81,4 @@
 /home/intern/HIII-web/server/obj/Debug/netcoreapp5.0/ref/EchoApp.dll
 /home/intern/HIII-web/server/obj/Debug/netcoreapp5.0/EchoApp.pdb
 /home/intern/HIII-web/server/obj/Debug/netcoreapp5.0/EchoApp.genruntimeconfig.cache
+/home/intern/Projects/server/obj/Debug/netcoreapp5.0/EchoApp.csprojAssemblyReference.cache
