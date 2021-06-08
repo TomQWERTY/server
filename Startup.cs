@@ -313,20 +313,24 @@ namespace EchoApp
 
         public void SortWaiting()
         {
-            for (int i = 0; i < waiting.Count - 1;)
+            for (int i = 0; i < waiting.Count;)
             {
-                int minSpeed = field[waiting[0].x, waiting[0].y].speed;
+                int minSpeed = field[waiting[i]].speed;
                 for (int j = i; j < waiting.Count; j++)
-                    if (field[waiting[j].x, waiting[j].y].speed < minSpeed)
-                        minSpeed = field[waiting[j].x, waiting[j].y].speed;
+                {
+                    if (field[waiting[j]].speed < minSpeed)
+                        minSpeed = field[waiting[j]].speed;
+                }
                 for (int j = i; j < waiting.Count; j++)
-                    if (field[waiting[j].x, waiting[j].y].speed == minSpeed)
+                {
+                    if (field[waiting[j]].speed == minSpeed)
                     {
                         Point swap = waiting[i];
                         waiting[i] = waiting[j];
                         waiting[j] = swap;
                         i++;
                     }
+                }
             }
         }
 
